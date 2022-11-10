@@ -128,6 +128,27 @@ class SignalCliRestApi(object):
             raise_from(SignalCliRestApiError(
                 "Couldn't list Signal Messenger groups: "), exc)
 
+    def trust(self, recipient):
+        try:
+            url = self._base_url + "/v1/identities/" + self._number + "/trust/" + recipient
+            data = {
+                "trust_all_known_keys": True
+            }
+
+            resp = requests.put(url, json=data, auth=self._auth, verify=self._verify_ssl)
+            json_resp = resp.json()
+            if resp.status_code != 204:
+                if "error" in json_resp:
+                    raise SignalCliRestApiError(json_resp["error"])
+                raise SignalCliRestApiError(
+                    f"Unknown error while trusting Recipient number {recipient}")
+            return json_resp
+        except Exception as exc:
+            if exc.__class__ == SignalCliRestApiError:
+                raise exc
+            raise_from(SignalCliRestApiError(
+                f"Couldn't trust Recipient {recipient}: "), exc)
+
     def receive(self):
         try:
             url = self._base_url + "/v1/receive/" + self._number
