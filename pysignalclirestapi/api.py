@@ -136,13 +136,13 @@ class SignalCliRestApi(object):
             }
 
             resp = requests.put(url, json=data, auth=self._auth, verify=self._verify_ssl)
-            json_resp = resp.json()
             if resp.status_code != 204:
+                json_resp = resp.json()
                 if "error" in json_resp:
                     raise SignalCliRestApiError(json_resp["error"])
                 raise SignalCliRestApiError(
                     f"Unknown error while trusting Recipient number {recipient}")
-            return json_resp
+            return True
         except Exception as exc:
             if exc.__class__ == SignalCliRestApiError:
                 raise exc
