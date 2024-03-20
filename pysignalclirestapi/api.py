@@ -18,12 +18,14 @@ class SignalCliRestApiErrorTrust(Exception):
     def __init__(self, message, recipients, status, data=None):
         super().__init__(message)
         self.data = data
+        self.status_code = status
         self.recipients = recipients
 
 class SignalCliRestApiErrorRatelimit(Exception):
     def __init__(self, message, recipients, status, data=None):
         super().__init__(message)
         self.data = data
+        self.status_code = status
         self.recipients = recipients
 
 
