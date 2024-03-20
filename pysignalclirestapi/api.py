@@ -14,6 +14,18 @@ class SignalCliRestApiError(Exception):
     """SignalCliRestApiError base class."""
     pass
 
+class SignalCliRestApiErrorTrust(Exception):
+    def __init__(self, message, recipients, status, data=None):
+        super().__init__(message)
+        self.data = data
+        self.recipients = recipients
+
+class SignalCliRestApiErrorRatelimit(Exception):
+    def __init__(self, message, recipients, status, data=None):
+        super().__init__(message)
+        self.data = data
+        self.recipients = recipients
+
 
 class SignalCliRestApiAuth(ABC):
     """SignalCliRestApiAuth base class."""
@@ -264,7 +276,12 @@ class SignalCliRestApi(object):
             if resp.status_code != 201:
                 json_resp = resp.json()
                 if "error" in json_resp:
-                    raise SignalCliRestApiError(json_resp["error"])
+                    if "trust" in json_resp["error"]:
+                        raise SignalCliRestApiErrorTrust(json_resp["error"], recipients, resp.status_code, json_resp)
+                    elif "rate" in json_resp["error"]:
+                        raise SignalCliRestApiErrorRatelimit(json_resp["error"], recipients, resp.status_code, json_resp)                        
+                    else:
+                        raise SignalCliRestApiError(json_resp["error"])
                 raise SignalCliRestApiError(
                     "Unknown error while sending signal message")
         except Exception as exc:
